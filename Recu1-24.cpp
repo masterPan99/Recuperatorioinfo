@@ -83,6 +83,9 @@ int main ()
     //reader(f);
    // Unificator(f);
     //------------------------------------------zona de Pruebas-----------------------------------------//
+    /*
+    perdon por el codigo dentro del main, normalmente trabajo con funciones, pero en estas circunstancias prefiero que funcione el codigo por sobre la optimizacion.
+    */
     int band=0;
     int Final=tam(f);
     int inicio=0;
@@ -97,18 +100,21 @@ for(int i=0;band!=1;i++)
     HD2 B;
     fread(&B,sizeof(uint16_t),1,f);
     //-------------could be a function---------------------Pido perdon por los ifs excesivos, con mas tiempo lo podria optimizar
-    if(B.DT_NL|B.DT_Nh==00)
+    uint8_t aux1=B.DT_Nh;//supongo que es igual al shift<<
+    uint8_t aux2=B.DT_NL;
+    uint8_t sumador=(aux1<<1)+aux2;
+    if(sumador==0)
     {
         printf("es un CPU\n");
     }
-    if(B.DT_NL|B.DT_Nh==01)
+    if(sumador==1)
     {
        printf("es un Sensor\n");
-       if(B.Sensor==10)
+       if(B.Sensor==2)
         {
             printf("es un sensor de Caudal\n");
         }
-         if(B.Sensor==11)
+         if(B.Sensor==1)
         {
             printf("es un sensor de Temperatura\n");
         }
@@ -122,20 +128,20 @@ for(int i=0;band!=1;i++)
         }
        
     }
-    if(B.DT_NL|B.DT_Nh==2)
+    if(sumador==2)
     {
         printf("es un Actuador");
-        if(B.Actuador==00)
+        if(B.Actuador==0)
         {
             printf("es una valvula\n");
         }
-        if(B.Actuador==01)
+        if(B.Actuador==1)
         {
             printf("es una Motor\n");
         }
         
     }
-    if((B.DT_NL|B.DT_Nh)==3)
+    if(sumador==3)
     {
         printf("es un Concentrador\n");
     }
@@ -146,14 +152,18 @@ for(int i=0;band!=1;i++)
     uint16_t ND;
     fread(&ND,sizeof(uint16_t),A.LLD,f);
     printf("\n\nSiguiente Dispositivo \n");
-    if(inicio==Final)
+    if(i==10)
     {
         band=1;
-    }else{
-        inicio=ftell(f);
     }
 }
     //------------------------------------------zona de Pruebas-----------------------------------------//
+    //------------------------------------------ZONA DE NEGOCIOS----------------------------------------//
+    /*
+        SINCERAMENTE EN ESTE MOMENTO NO SE ME ACUERDO LA MANERA DE CONTAR EL NUMERO DE DISPOSITIVOS, VOY A SUPONER QUE SON 10, SIN EMBARGO CON MAS TIEMPO PARA PENSAR, SE ME OCURRIRA UN PROGRAMA MAS GRAL. HORA(21:00)
+    
+    */
+   //---------------------------------------------------------------------------------------------------//
     fclose(f);
     return 0;
 }
@@ -211,7 +221,7 @@ int tam(FILE *f)//devulve tamaño en bytes
    return Tam;
 }
 
-void Unificator(FILE *f)//funtion to verificate the correct reading of the file
+void Unificator(FILE *f)//function to verificate the correct reading of the file
 {
     int band=0;
     int Final=tam(f);
