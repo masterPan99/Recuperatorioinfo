@@ -63,9 +63,21 @@ struct MASTER
     HD2 MIDDLE;
     HD3 LOWER;
 };
+struct cantidad
+{
+    uint8_t CPUS=0;
+    uint8_t Sen_temp=0;
+    uint8_t Sen_pres=0;
+    uint8_t Sen_nivel=0;
+    uint8_t Sen_caudal=0;
+    uint8_t Valves=0;
+    uint8_t motores=0;
+    uint8_t concentradores=0;
+};
+
 //--------------Funciones---------------------//
 void reader(FILE *f);
-void Unificator(FILE *f);
+struct MASTER Unificator(FILE *f,struct cantidad aux99);
 int tam(FILE *f);
 //--------------------------------------------//
 
@@ -74,7 +86,7 @@ int tam(FILE *f);
 int main ()
 {
     FILE *f;
-    //MASTER A;//estructura donde guardo los ids
+    MASTER A[10];//estructura donde guardo los ids
     f=fopen("network_structure.dat","rb");
      if(fopen("network_structure.dat","rb")==NULL)
     {
@@ -83,17 +95,92 @@ int main ()
     //reader(f);
    // Unificator(f);
     //------------------------------------------zona de Pruebas-----------------------------------------//
-    /*
-    perdon por el codigo dentro del main, normalmente trabajo con funciones, pero en estas circunstancias prefiero que funcione el codigo por sobre la optimizacion.
-    */
+
     int band=0;
-    int Final=tam(f);
+    //int Final=tam(f);
     int inicio=0;
+    cantidad TODO;
     fseek(f,0,SEEK_SET);
 
 for(int i=0;band!=1;i++)
 {
-    HD1 A;
+    A[i]=Unificator(f,TODO);
+    if(i==10)
+    {
+        band=1;
+    }
+}
+    //------------------------------------------zona de Pruebas-----------------------------------------//
+    //------------------------------------------ZONA DE NEGOCIOS----------------------------------------//
+    /*
+        SINCERAMENTE EN ESTE MOMENTO NO SE ME ACUERDO LA MANERA DE CONTAR EL NUMERO DE DISPOSITIVOS, VOY A SUPONER QUE SON 10, SIN EMBARGO CON MAS TIEMPO PARA PENSAR, SE ME OCURRIRA UN PROGRAMA MAS GRAL. HORA(21:00)
+    
+    */
+   //---------------------------------------------------------------------------------------------------//
+    fclose(f);
+    return 0;
+}
+
+void show_devices(struct cantidad AUX99)//funcion para cant de dispositivos
+{
+   printf("\n")
+}
+//bueno la idea era mandar un puntero a la funcion unificar, un puntero de tipo struct cantidad que almacene los valores de los dispositivos, y los puestre llamando a esta funcion, luego 
+
+void Vector_de_HEADERS();//esta funcion nos mostraria el vector en orden, y bueno me queda plantear la manera de imprimir la linea de HEADERS 
+
+void reader(FILE *f)//funtion to verificate the correct reading of the file
+{
+
+   if(fopen("network_structure.dat","rb")==NULL)
+    {
+        printf("ERROR NO SE ENCUENTRA EL ARCHIVO");
+    }
+   // struct HEADER A;
+   HD1 A;
+    fread(&A,sizeof(uint16_t),1,f);
+    printf("El ID es[%u]\n",A.ID);
+    printf("La cantidad de dispositivos (esclavos) es [%u]\n",A.LLD);
+    HD2 B;
+    fread(&B,sizeof(uint16_t),1,f);
+    //-------------could be a function---------------------
+    if(B.DT_NL|B.DT_Nh==0)
+    {
+        printf("es un CPU\n");
+    }
+    if(B.DT_NL|B.DT_Nh==1)
+    {
+       printf("es un Sensor\n");
+    }
+    if(B.DT_NL|B.DT_Nh==2)
+    {
+        printf("es un Actuador");
+    }
+    if(B.DT_NL|B.DT_Nh==3)
+    {
+        printf("es un Concentrador");
+    }
+    //---------------------------------------------------
+    HD3 C;
+    fread(&C,sizeof(uint16_t),1,f);
+    printf("Cantidad de dispositivos Superiores [%u]\n",C.UPLD_ID);
+    fread(NULL,sizeof(uint16_t),A.LLD,f);
+
+}
+
+
+int tam(FILE *f)//devulve tamaño en bytes
+{
+    int Tam;
+   Tam = fseek(f,0,SEEK_END);
+   fseek(f,0,SEEK_SET);
+   return Tam;
+}
+
+struct MASTER Unificator(FILE *f,struct cantidad aux99)//function to verificate the correct reading of the file
+{
+ MASTER MOU;
+   HD1 A;
     fread(&A,sizeof(uint16_t),1,f);
     printf("El ID es[%u]\n",A.ID);
     printf("La cantidad de dispositivos (esclavos) es [%u]\n",A.LLD);
@@ -152,147 +239,10 @@ for(int i=0;band!=1;i++)
     uint16_t ND;
     fread(&ND,sizeof(uint16_t),A.LLD,f);
     printf("\n\nSiguiente Dispositivo \n");
-    if(i==10)
-    {
-        band=1;
-    }
-}
-    //------------------------------------------zona de Pruebas-----------------------------------------//
-    //------------------------------------------ZONA DE NEGOCIOS----------------------------------------//
-    /*
-        SINCERAMENTE EN ESTE MOMENTO NO SE ME ACUERDO LA MANERA DE CONTAR EL NUMERO DE DISPOSITIVOS, VOY A SUPONER QUE SON 10, SIN EMBARGO CON MAS TIEMPO PARA PENSAR, SE ME OCURRIRA UN PROGRAMA MAS GRAL. HORA(21:00)
-    
-    */
-   //---------------------------------------------------------------------------------------------------//
-    fclose(f);
-    return 0;
-}
-
-
-
-
-
-
-void reader(FILE *f)//funtion to verificate the correct reading of the file
-{
-
-   if(fopen("network_structure.dat","rb")==NULL)
-    {
-        printf("ERROR NO SE ENCUENTRA EL ARCHIVO");
-    }
-   // struct HEADER A;
-   HD1 A;
-    fread(&A,sizeof(uint16_t),1,f);
-    printf("El ID es[%u]\n",A.ID);
-    printf("La cantidad de dispositivos (esclavos) es [%u]\n",A.LLD);
-    HD2 B;
-    fread(&B,sizeof(uint16_t),1,f);
-    //-------------could be a function---------------------
-    if(B.DT_NL|B.DT_Nh==0)
-    {
-        printf("es un CPU\n");
-    }
-    if(B.DT_NL|B.DT_Nh==1)
-    {
-       printf("es un Sensor\n");
-    }
-    if(B.DT_NL|B.DT_Nh==2)
-    {
-        printf("es un Actuador");
-    }
-    if(B.DT_NL|B.DT_Nh==3)
-    {
-        printf("es un Concentrador");
-    }
-    //---------------------------------------------------
-    HD3 C;
-    fread(&C,sizeof(uint16_t),1,f);
-    printf("Cantidad de dispositivos Superiores [%u]\n",C.UPLD_ID);
-    fread(NULL,sizeof(uint16_t),A.LLD,f);
-
-}
-
-
-int tam(FILE *f)//devulve tamaño en bytes
-{
-    int Tam;
-   Tam = fseek(f,0,SEEK_END);
-   fseek(f,0,SEEK_SET);
-   return Tam;
-}
-
-void Unificator(FILE *f)//function to verificate the correct reading of the file
-{
-    int band=0;
-    int Final=tam(f);
-    int inicio=0;
-   for(int i=0;band==1;i++)
-   {
-     if(fopen("network_structure.dat","rb")==NULL)
-    {
-        printf("ERROR NO SE ENCUENTRA EL ARCHIVO");
-    }
-   // struct HEADER A;
-   HD1 A;
-    fread(&A,sizeof(uint16_t),1,f);
-    printf("El ID es[%u]\n",A.ID);
-    printf("La cantidad de dispositivos (esclavos) es [%u]\n",A.LLD);
-    HD2 B;
-    fread(&B,sizeof(uint16_t),1,f);
-    //-------------could be a function---------------------Pido perdon por los ifs excesivos, con mas tiempo lo podria optimizar
-    if(B.DT_NL|B.DT_Nh==0)
-    {
-        printf("es un CPU\n");
-    }
-    if(B.DT_NL|B.DT_Nh==1)
-    {
-       printf("es un Sensor\n");
-       if(B.Sensor==0)
-        {
-            printf("es un sensor de Caudal\n");
-        }
-         if(B.Sensor==1)
-        {
-            printf("es un sensor de Temperatura\n");
-        }
-         if(B.Sensor==2)
-        {
-            printf("es un sensor de Presion\n");
-        }
-         if(B.Sensor==3)
-        {
-            printf("es un sensor de nivel\n");
-        }
-       
-    }
-    if(B.DT_NL|B.DT_Nh==2)
-    {
-        printf("es un Actuador");
-        if(B.Actuador==0)
-        {
-            printf("es una valvula");
-        }
-        if(B.Actuador==1)
-        {
-            printf("es una Motor");
-        }
-        
-    }
-    if(B.DT_NL|B.DT_Nh==3)
-    {
-        printf("es un Concentrador");
-    }
-    //---------------------------------------------------
-    HD3 C;
-    fread(&C,sizeof(uint16_t),1,f);
-    printf("Cantidad de dispositivos Superiores [%u]\n",C.UPLD_ID);
-    fread(NULL,sizeof(uint16_t),A.LLD,f);
-    if(i==2)
-    {
-        band==1;
-    }
-   }
-
+    MOU.TOP=A;
+    MOU.MIDDLE=B;
+    MOU.LOWER=C;
+    return(MOU);
 }
 
 
